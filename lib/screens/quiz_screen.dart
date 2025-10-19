@@ -6,7 +6,7 @@ import '../data/questions.dart';
 import 'results_screen.dart';
 
 class QuizScreen extends StatefulWidget {
-  const QuizScreen({super.key});
+  const QuizScreen({Key? key}) : super(key: key);
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -26,9 +26,11 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void _selectAnswer(int index) {
-    setState(() {
-      userAnswers[currentIndex] = index;
-    });
+    if (userAnswers[currentIndex] == null) {
+      setState(() {
+        userAnswers[currentIndex] = index;
+      });
+    }
   }
 
   void _nextQuestion() {
@@ -122,11 +124,12 @@ class _QuizScreenState extends State<QuizScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         ElevatedButton(
-                          onPressed: () => _selectAnswer(index),
+                          onPressed: userAnswers[currentIndex] == null ? () => _selectAnswer(index) : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: buttonColor,
                             padding: const EdgeInsets.all(16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            disabledBackgroundColor: buttonColor,
                           ),
                           child: Text(
                             question.options[index],
