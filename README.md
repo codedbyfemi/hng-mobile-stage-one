@@ -302,6 +302,6 @@ For issues or questions, please create an issue in the repository or contact the
 ---
 
 **Version**: 1.0.0  
-**Last Updated**: October 2024  
+**Last Updated**: October 2025  
 **Flutter Version**: 3.0+  
 **Dart Version**: 3.0+
