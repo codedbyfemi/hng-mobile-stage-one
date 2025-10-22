@@ -7,7 +7,7 @@ import '../data/questions.dart';
 import 'results_screen.dart';
 
 class QuizScreen extends StatefulWidget {
-  const QuizScreen({Key? key}) : super(key: key);
+  const QuizScreen({super.key});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -187,9 +187,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 itemCount: question.options.length,
                 itemBuilder: (context, index) {
                   final isSelected = selectedAnswer == index;
-                  final isCorrect = index == question.correctAnswerIndex;
-                  final isWrongSelection = isSelected && !isCorrect;
-                  
+                  final isCorrect = index == question.correctAnswerIndex;                  
                   Color buttonColor = Colors.grey[300]!;
                   if (isSelected) {
                     buttonColor = isCorrect ? Colors.green : Colors.red;
@@ -219,40 +217,6 @@ class _QuizScreenState extends State<QuizScreen> {
                             ),
                           ),
                         ),
-                        // if (isWrongSelection)
-                        //   Padding(
-                        //     padding: const EdgeInsets.only(top: 8.0),
-                        //     child: Container(
-                        //       padding: const EdgeInsets.all(12),
-                        //       decoration: BoxDecoration(
-                        //         color: Colors.green[50],
-                        //         borderRadius: BorderRadius.circular(8),
-                        //         border: Border.all(color: Colors.green, width: 2),
-                        //       ),
-                        //       child: Column(
-                        //         crossAxisAlignment: CrossAxisAlignment.start,
-                        //         children: [
-                        //           Text(
-                        //             'Correct Answer:',
-                        //             style: TextStyle(
-                        //               fontSize: 12,
-                        //               fontWeight: FontWeight.bold,
-                        //               color: Colors.green[700],
-                        //             ),
-                        //           ),
-                        //           const SizedBox(height: 4),
-                        //           Text(
-                        //             question.options[question.correctAnswerIndex],
-                        //             style: TextStyle(
-                        //               fontSize: 14,
-                        //               color: Colors.green[700],
-                        //               fontWeight: FontWeight.w500,
-                        //             ),
-                        //           ),
-                        //         ],
-                        //       ),
-                        //     ),
-                        //   ),
                       ],
                     ),
                   );
