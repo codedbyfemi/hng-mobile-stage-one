@@ -1,5 +1,6 @@
 // lib/screens/quiz_screen.dart
 import 'package:flutter/material.dart';
+import 'dart:async';
 import '../models/question.dart';
 import '../services/quiz_database.dart';
 import '../data/questions.dart';
@@ -17,41 +18,78 @@ class _QuizScreenState extends State<QuizScreen> {
   int currentIndex = 0;
   late List<int?> userAnswers;
   bool showResults = false;
+  
+  late Timer timer;
+  int timeLeft = 30;
+  static const int timePerQuestion = 30;
 
   @override
   void initState() {
     super.initState();
     questions = techTriviaQuestions;
     userAnswers = List<int?>.filled(questions.length, null);
+    _startTimer();
+  }
+
+  void _startTimer() {
+    timeLeft = timePerQuestion;
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        timeLeft--;
+      });
+      
+      if (timeLeft <= 0) {
+        timer.cancel();
+        _autoNextQuestion();
+      }
+    });
   }
 
   void _selectAnswer(int index) {
-    if (userAnswers[currentIndex] == null) {
+    if (userAnswers[currentIndex] == null && timeLeft > 0) {
       setState(() {
         userAnswers[currentIndex] = index;
       });
+      timer.cancel();
     }
   }
 
-  void _nextQuestion() {
+  void _autoNextQuestion() {
+    timer.cancel();
     if (currentIndex < questions.length - 1) {
       setState(() {
         currentIndex++;
       });
+      _startTimer();
+    } else {
+      _showResults();
+    }
+  }
+
+  void _nextQuestion() {
+    timer.cancel();
+    if (currentIndex < questions.length - 1) {
+      setState(() {
+        currentIndex++;
+      });
+      _startTimer();
     } else {
       _showResults();
     }
   }
 
   void _previousQuestion() {
+    timer.cancel();
     if (currentIndex > 0) {
       setState(() {
         currentIndex--;
       });
+      _startTimer();
     }
   }
 
   void _showResults() async {
+    timer.cancel();
     int finalScore = 0;
     for (int i = 0; i < questions.length; i++) {
       if (userAnswers[i] == questions[i].correctAnswerIndex) {
@@ -66,10 +104,24 @@ class _QuizScreenState extends State<QuizScreen> {
           builder: (context) => ResultsScreen(
             score: finalScore,
             totalQuestions: questions.length,
+            userAnswers: userAnswers,
+            questions: questions,
           ),
         ),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
+  }
+
+  Color _getTimerColor() {
+    if (timeLeft <= 10) return Colors.red;
+    if (timeLeft <= 15) return Colors.orange;
+    return Colors.green;
   }
 
   @override
@@ -93,9 +145,36 @@ class _QuizScreenState extends State<QuizScreen> {
               minHeight: 8,
             ),
             const SizedBox(height: 16),
-            Text(
-              'Question ${currentIndex + 1}/${questions.length} ($percentage%)',
-              style: Theme.of(context).textTheme.labelLarge,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Question ${currentIndex + 1}/${questions.length} ($percentage%)',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _getTimerColor().withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: _getTimerColor()),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.timer, size: 16, color: _getTimerColor()),
+                        const SizedBox(width: 6),
+                        Text(
+                          '$timeLeft s',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: _getTimerColor(),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 24),
             Text(
@@ -124,7 +203,7 @@ class _QuizScreenState extends State<QuizScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         ElevatedButton(
-                          onPressed: userAnswers[currentIndex] == null ? () => _selectAnswer(index) : null,
+                          onPressed: userAnswers[currentIndex] == null && timeLeft > 0 ? () => _selectAnswer(index) : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: buttonColor,
                             padding: const EdgeInsets.all(16),
@@ -140,40 +219,40 @@ class _QuizScreenState extends State<QuizScreen> {
                             ),
                           ),
                         ),
-                        if (isWrongSelection)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.green[50],
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.green, width: 2),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Correct Answer:',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.green[700],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    question.options[question.correctAnswerIndex],
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.green[700],
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                        // if (isWrongSelection)
+                        //   Padding(
+                        //     padding: const EdgeInsets.only(top: 8.0),
+                        //     child: Container(
+                        //       padding: const EdgeInsets.all(12),
+                        //       decoration: BoxDecoration(
+                        //         color: Colors.green[50],
+                        //         borderRadius: BorderRadius.circular(8),
+                        //         border: Border.all(color: Colors.green, width: 2),
+                        //       ),
+                        //       child: Column(
+                        //         crossAxisAlignment: CrossAxisAlignment.start,
+                        //         children: [
+                        //           Text(
+                        //             'Correct Answer:',
+                        //             style: TextStyle(
+                        //               fontSize: 12,
+                        //               fontWeight: FontWeight.bold,
+                        //               color: Colors.green[700],
+                        //             ),
+                        //           ),
+                        //           const SizedBox(height: 4),
+                        //           Text(
+                        //             question.options[question.correctAnswerIndex],
+                        //             style: TextStyle(
+                        //               fontSize: 14,
+                        //               color: Colors.green[700],
+                        //               fontWeight: FontWeight.w500,
+                        //             ),
+                        //           ),
+                        //         ],
+                        //       ),
+                        //     ),
+                        //   ),
                       ],
                     ),
                   );

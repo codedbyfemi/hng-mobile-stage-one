@@ -52,7 +52,7 @@ final List<Question> techTriviaQuestions = [
   ),
   Question(
     id: 9,
-    question: 'What year was Python created?',
+    question: 'What year did Python\'s creation begin?',
     options: ['1989', '1995', '2000', '2005'],
     correctAnswerIndex: 0,
   ),
